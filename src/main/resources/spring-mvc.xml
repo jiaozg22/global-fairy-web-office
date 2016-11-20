@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd  
+	 					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	 					http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd  
+	 					http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	 					http://www.springframework.org/schema/mvc
+      					http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+	<context:annotation-config>
+	<!--开启注解处理器-->
+	</context:annotation-config>
+	<context:property-placeholder location="classpath:conf\log4j.properties" />
+	<!-- 引入属性文件 -->
+	
+	<import resource="classpath:spring-mvc-hibernate.xml"/>	
+	<import resource="classpath:spring-mvc-context.xml"/>	
+	<mvc:default-servlet-handler/> 
+	<!-- 添加注解驱动 -->      
+	<mvc:annotation-driven />
+	<!-- 加载controller的时候,不加载service,因为此时事物并未生效,若此时加载了service,那么事物无法对service进行拦截 -->
+	<context:component-scan base-package="com.jzg.control"/>
+	
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
+    	<property name="prefix" value="/webpage/"/> 
+		<property name="suffix" value=".jsp"/> 
+	</bean> 
+	
+	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping" />  
+    <!-- 处理方法级别上的@RequestMapping注解-->  
+    <bean  class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />  
+     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" p:defaultEncoding="UTF-8" p:maxUploadSize="5000000">
+     	
+     </bean>
+     
+	
+	 
+</beans>

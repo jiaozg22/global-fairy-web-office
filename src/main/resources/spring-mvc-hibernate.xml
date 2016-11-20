@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+						http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd  
+	 					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+	 					http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd  
+	 					http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	 					http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd
+          			 	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+	 					http://www.springframework.org/schema/mvc
+      					http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd"
+      					default-autowire="byName" default-lazy-init="false">
+	<context:annotation-config/>
+	
+	   <!-- 获取数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+       <property name="driverClass">
+           <value>com.mysql.jdbc.Driver</value>
+       </property>
+       <property name="jdbcUrl">
+           <value>jdbc:mysql://localhost:3306/superversionandmanagement?characterEncoding=UTF-8</value>
+       </property>
+       <property name="user">
+           <value>root</value>
+       </property>
+       <property name="password">
+           <value>123456</value>
+       </property>
+       
+       <property name="maxPoolSize"><value>15</value></property>
+       <property name="maxIdleTime"><value>18000</value></property>
+       <!-- 当连接池耗尽时候，一次获得连接数-->
+       <property name="acquireIncrement"><value>5</value></property>
+       
+       <property name="maxStatements"><value>0</value></property>
+       <!-- 当连接池连接耗尽时，客户端getConnection(),所等待的时间-->
+       <property name="idleConnectionTestPeriod"><value>12000</value></property>
+       <!-- 当连接失效时，获得连接的次数，0为无限次（重连）-->
+       <property name="acquireRetryAttempts"><value>30</value></property>
+       
+    </bean>
+
+	<!-- JDBC配置 -->
+	<bean id="namedParameterJdbcTemplate"
+		class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+    
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<!-- 定义Hibernate的SessionFactory的属性 -->
+		<property name="hibernateProperties">
+			<props>
+				<!-- 指定数据库方言 -->
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.MySQLDialect
+				</prop>
+				<!-- 是否根据需要每次自动创建数据库 -->
+				<prop key="hibernate.hbm2ddl.auto">
+					update
+				</prop>
+				<!-- 显示Hibernate持久化操作所生成的SQL -->
+				<prop key="hibernate.show_sql">
+					true
+				</prop>
+				<!-- 将SQL脚本进行格式化后再输出 -->
+				<prop key="hibernate.format_sql">
+					true
+				</prop>
+				
+				<!-- 开启comment-->
+				<prop key="hibernate.use_sql_comments">
+					false
+				</prop> 
+			</props>
+			
+		</property>
+		
+		<!-- 使用扫描的方式加载module包下的具体实体类 -->
+		<!-- 使用扫描的方式加载module包下的所有实体类 ，由于是扫描包，所以不需要。*，除非是哟module包下面还有好多包需要扫描。packagesToScan就是扫描到包-->
+		<!-- 
+			packagesToScan表示配置你需要sping帮你扫描的包名，也就是只需要详细到包，
+			而题主在配置的时候写的是com.springapp.mvc.entity.*表示的就是entity包下的所有包，
+			而你的entity里面只有详细的类，所以第一次扫描不到包。第二次配置为com.springapp.mvc.*就是表示扫描mvc下的所有包，
+			mvc下至少有个entity包，所以可以生效。 
+
+			其实题主只需要把配置写成com.springapp.mvc.entity就行了。加上“.*”就是画蛇添足。 
+		 -->
+		<property name="packagesToScan">
+        	<list>
+            	<!-- <value>${dnsf}.plat.module</value> -->
+            	<value>com.jzg.module.entity</value>
+			</list>
+		</property>
+		
+	</bean>
+	
+	<!-- JDBC配置 -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+	</bean>
+
+	<!-- 配置事物管理器，在*ServiceImpl里写@Transactional就可以启用事物管理 -->
+	<bean name="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+</beans>
