@@ -46,7 +46,7 @@ public class DbDdlCreator {
 				sql.append(",");
 			}
 		}
-		sql.append(" )type=myisam default charset utf8;");
+		sql.append(" ) type=myisam default charset utf8;");
 		System.out.println(sql);
 		
 		logger.info(sql);
